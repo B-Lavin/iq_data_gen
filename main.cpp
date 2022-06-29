@@ -30,8 +30,7 @@ int main(int argc, char* argv[]) {
     int seconds = 1;
     long double fs1 = 60000000;
     int freq1 = 1*fs1; // more of an offset than a frequency
-    //int freq1 = 1580; //4.58
-    //int freq2 = 0.6*10230000;
+    //int freq2 = 0.6*fs1;
     long double symbol_duration_time = 1/fs1; 
     
     vector<double> sample_time = {};
@@ -50,7 +49,6 @@ int main(int argc, char* argv[]) {
     
     for(int seconds_into_run=0; seconds_into_run < seconds; ++seconds_into_run) 
     {
-   
         for(int sample_index =0; sample_index < samples_in_a_sec; ++sample_index)
         {
             int16_t ival {0};
@@ -71,9 +69,7 @@ int main(int argc, char* argv[]) {
             bytes[2] = qval & 0xff;
             bytes[3] = qval >> 8;
             
-          
-//              fprintf(csvfile, "%d,%d\n", ival, qval);
-              fwrite(bytes, sizeof bytes, 1, outfile);
+            fwrite(bytes, sizeof bytes, 1, outfile);
 
 
         } 
@@ -81,12 +77,7 @@ int main(int argc, char* argv[]) {
         cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << endl;
     }
 
+    fclose(outfile);
 
-//        fclose(csvfile);
-        fclose(outfile);
-
-    
-    
-    
     return 0;
 }
