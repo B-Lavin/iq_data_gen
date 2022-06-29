@@ -25,11 +25,11 @@ int main(int argc, char* argv[]) {
         }*/
 
     int16_t dac_range = INT16_MAX - 1;
-    double gain1 = 0.8;
+    double gain1 = 1;
     //double gain2 = 0.49;
     int seconds = 1;
     long double fs1 = 60000000;
-    int freq1 = 0.8*fs1; // more of an offset than a frequency
+    int freq1 = 1*fs1; // more of an offset than a frequency
     //int freq1 = 1580; //4.58
     //int freq2 = 0.6*10230000;
     long double symbol_duration_time = 1/fs1; 
