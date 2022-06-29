@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     
     printf("START OF DATA\n");
     
-    for(int seconds_into_run=0; seconds_into_run<= seconds; ++seconds_into_run) 
+    for(int seconds_into_run=0; seconds_into_run < seconds; ++seconds_into_run) 
     {
    
         for(int sample_index =0; sample_index < samples_in_a_sec; ++sample_index)
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
 
         } 
         
-        cout << "approximately " << seconds_into_run << " seconds of IQ data produced" << endl;
+        cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << endl;
     }
 
 
