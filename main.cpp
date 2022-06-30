@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     //double gain2 = 0.49;
     int seconds = 1;
     long double fs1 = 60000000;
-    int freq1 = 1*fs1; // more of an offset than a frequency
+    int freq1 = 100; // more of an offset than a frequency
     //int freq2 = 0.6*fs1;
     long double symbol_duration_time = 1/fs1; 
     
@@ -62,12 +62,14 @@ int main(int argc, char* argv[]) {
                 qval = dac_range * gain1 * cos(2*M_PI*freq1*(1/fs1*sample_index));
             }
 
+            //intel processor so wrong endianess. 
+            uint8_t bytes[4];
+            //int16_t bytes[2] = {0, 0};
 
-            char bytes[4];
-            bytes[0] = ival & 0xff;
-            bytes[1] = ival >> 8;
-            bytes[2] = qval & 0xff;
-            bytes[3] = qval >> 8;
+            bytes[0] = (ival >> 8) & 0xff;
+            bytes[1] = ival & 0xff;
+            bytes[2] = (qval >> 8) & 0xff;
+            bytes[3] = qval & 0xff;
             
             fwrite(bytes, sizeof bytes, 1, outfile);
 
