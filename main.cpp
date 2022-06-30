@@ -23,8 +23,11 @@ int main(int argc, char* argv[]) {
                 perror("Error opening CSV file");
                 return 1;
         }*/
+    int8_t dac_range_4bit = (INT8_MAX - 1 ) / 2; 
+    int8_t dac_range_8bit = INT8_MAX - 1;
+    int16_t dac_range_16bit = INT16_MAX - 1;
 
-    int16_t dac_range = INT16_MAX - 1;
+
     double gain1 = 1;
     //double gain2 = 0.49;
     int seconds = 1;
@@ -53,19 +56,11 @@ int main(int argc, char* argv[]) {
         {
             int16_t ival {0};
             int16_t qval {0};
-            if(multi_frequency_flag)
-            {
-                //ival = (dac_range * gain1 * sin(2*M_PI*freq1*(1/fs1*sample_index))) + (dac_range * gain2 * sin(2*M_PI*freq2*(1/fs1*sample_index)));
-                //qval = (dac_range * gain1 * cos(2*M_PI*freq1*(1/fs1*sample_index))) +  (dac_range * gain2 * cos(2*M_PI*freq2*(1/fs1*sample_index)));
-            } else {
-                ival = dac_range * gain1 * sin(2*M_PI*freq1*(1/fs1*sample_index));
-                qval = dac_range * gain1 * cos(2*M_PI*freq1*(1/fs1*sample_index));
-            }
-
-            //intel processor so wrong endianess. 
+            ival = dac_range_16bit * gain1 * sin(2*M_PI*freq1*(1/fs1*sample_index));
+            qval = dac_range_16bit * gain1 * cos(2*M_PI*freq1*(1/fs1*sample_index));
+            
             uint8_t bytes[4];
-            //int16_t bytes[2] = {0, 0};
-
+            // Intel processor on laptop so need to change byte order to meet ION standard.
             bytes[0] = (ival >> 8) & 0xff;
             bytes[1] = ival & 0xff;
             bytes[2] = (qval >> 8) & 0xff;
