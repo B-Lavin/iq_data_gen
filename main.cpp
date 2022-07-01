@@ -5,42 +5,105 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <vector>
+#include <exception>
+#include <string>
 
-using namespace std;
 
 
 int main(int argc, char* argv[]) {
   
+    if (argc == 1)
+    {
+        std::cout << "Insuffitient arguments:"
+                  << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
+                  << "\nintel specific data packing, check your endianess!!!"
+                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset>"
+                  << "\n Example: ./iq_data_gen 60e6 16 100" << std::endl;
+        return 0;
+    }
+    else if ( argc == 4)
+    {
+        std::cout << "correct number of arguments, but limited error checking in place" << std::endl;
+    }
+    else
+    {
+        std::cout << "argument number incorrect exiting" << std::endl;
+        return -1;
+    }
+
     const char *ofile = "iq.bin";
     FILE *outfile = fopen(ofile, "wb");
     if (outfile==NULL) perror ("Error opening file to write");
-    
-//    const bool generate_csv {false};
-/*    const char *ofile_csv = "c:\\temp\\iq.csv";
-    FILE *csvfile = fopen(ofile_csv, "w");
-        if (!csvfile) 
-        {
-                perror("Error opening CSV file");
-                return 1;
-        }*/
-    int8_t dac_range_4bit = (INT8_MAX - 1 ) / 2; 
-    int8_t dac_range_8bit = INT8_MAX - 1;
+
+
+    int bit_depth {};
+    std::string bd_str = argv[2];
+    try 
+    {
+        bit_depth = std::stoi(bd_str);
+    } 
+    catch (std::exception const &ex) 
+    {
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
+    }
+
+    int16_t dac_range_4bit = 0x7; 
+    int16_t dac_range_8bit = INT8_MAX - 1;
     int16_t dac_range_16bit = INT16_MAX - 1;
 
+    int16_t* dac_range_p {}; 
 
-    double gain1 = 1;
-    //double gain2 = 0.49;
-    int seconds = 1;
-    long double fs1 = 60000000;
-    int freq1 = 100; // more of an offset than a frequency
-    //int freq2 = 0.6*fs1;
-    long double symbol_duration_time = 1/fs1; 
+    switch( bit_depth )
+    {
+        case 4:
+            dac_range_p = &dac_range_4bit;
+            break;
+        case 8:
+            dac_range_p = &dac_range_8bit;
+            break;
+        case 16:
+            dac_range_p = &dac_range_16bit;
+            break;
+        default:
+            std::cout << "\nBit depth not recognised" << std::endl;
+            return 0;
+    }
+
+    double fs {};
+    std::string fs_str = argv[1];
+    try
+    {
+        fs = std::stod(fs_str);
+    }
+    catch (std::exception const &ex) 
+    {
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
+    }
+
+    double freq_offset {};
+    std::string freq_offset_str = argv[3];
+    try
+    {
+        freq_offset = std::stod(freq_offset_str);
+    }
+    catch (std::exception const &ex) 
+    {
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
+    }
     
-    vector<double> sample_time = {};
-    bool multi_frequency_flag {false};
+    double gain = 1;
+    int seconds = 1;
+    long double symbol_duration_time = 1/fs; 
 
-    //fill t with values from 0 to 1 in steps of 1/fs1
-    for(int index = 0; index<fs1; ++index)
+    std::cout << "fs = " << fs << ", bits = " << bit_depth << ", frq offset = " << freq_offset << std::endl;
+    
+    std::vector<double> sample_time = {};
+
+    //fill t with values from 0 to 1 in steps of 1/fs
+    for(int index = 0; index<fs; ++index)
     {
         sample_time.push_back(index*symbol_duration_time);
     }
@@ -48,7 +111,7 @@ int main(int argc, char* argv[]) {
     int samples_in_a_sec = sample_time.size();
     
     
-    printf("START OF DATA\n");
+    std::cout << "\nSTARTING DATA GENERATION" << std::endl;
     
     for(int seconds_into_run=0; seconds_into_run < seconds; ++seconds_into_run) 
     {
@@ -56,22 +119,38 @@ int main(int argc, char* argv[]) {
         {
             int16_t ival {0};
             int16_t qval {0};
-            ival = dac_range_16bit * gain1 * sin(2*M_PI*freq1*(1/fs1*sample_index));
-            qval = dac_range_16bit * gain1 * cos(2*M_PI*freq1*(1/fs1*sample_index));
+            ival = (*dac_range_p) * gain * sin(2*M_PI*freq_offset*(1/fs*sample_index));
+            qval = (*dac_range_p) * gain * cos(2*M_PI*freq_offset*(1/fs*sample_index));
             
-            uint8_t bytes[4];
+            //32 bit words for ION format
+            
             // Intel processor on laptop so need to change byte order to meet ION standard.
-            bytes[0] = (ival >> 8) & 0xff;
-            bytes[1] = ival & 0xff;
-            bytes[2] = (qval >> 8) & 0xff;
-            bytes[3] = qval & 0xff;
-            
-            fwrite(bytes, sizeof bytes, 1, outfile);
-
+            if ( bit_depth == 16 )
+            {
+                uint8_t bytes[4];
+                bytes[0] = (ival >> 8) & 0xff;
+                bytes[1] = ival & 0xff;
+                bytes[2] = (qval >> 8) & 0xff;
+                bytes[3] = qval & 0xff;
+                fwrite(bytes, sizeof bytes, 1, outfile);
+            }
+            else if ( bit_depth == 8 )
+            {
+                uint8_t byte = (uint8_t)ival;
+                fwrite(&byte, sizeof(uint8_t), 1, outfile);
+                byte = (uint8_t)qval;
+                fwrite(&byte, sizeof(uint8_t), 1, outfile);
+            }
+            else // bit depth is 4, checked above
+            {
+                uint8_t byte = (uint8_t)( ( ival & 0xf ) << 4 );
+                byte |= (uint8_t) ( qval & 0xf );
+                fwrite(&byte, sizeof(uint8_t), 1, outfile);
+            }
 
         } 
         
-        cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << endl;
+        std::cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << std::endl;
     }
 
     fclose(outfile);
