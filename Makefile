@@ -1,6 +1,6 @@
 CXX=g++
 RM=rm -f
-CPPFLAGS=-g -Wall -std=c++1z
+CPPFLAGS=-g -Wall -std=c++17
 LDFLAGS=-g
 #$(shell root-config --ldflags)
 
