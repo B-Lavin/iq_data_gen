@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    int chirp_flag {};
+    int chirp_flag {0};
     std::string chirp_str = argv[4];
 
     try
@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    int seconds {};
+    int seconds {1};
     std::string duration_secs = argv[5];
     try
     {
