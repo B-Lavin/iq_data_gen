@@ -17,11 +17,11 @@ int main(int argc, char* argv[]) {
         std::cout << "Insuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
-                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset>"
-                  << "\nExample: ./iq_data_gen 60e6 16 100" << std::endl;
+                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset> <chirp>"
+                  << "\nExample: ./iq_data_gen 60e6 16 100 0" << std::endl;
         return 0;
     }
-    else if ( argc == 4)
+    else if ( argc == 5)
     {
         std::cout << "correct number of arguments, but limited error checking in place" << std::endl;
     }
@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
     FILE *outfile = fopen(ofile, "wb");
     if (outfile==NULL) perror ("Error opening file to write");
 
+    //refactor all of the assignment! one try catch block I think
 
     int bit_depth {};
     std::string bd_str = argv[2];
@@ -93,12 +94,36 @@ int main(int argc, char* argv[]) {
         std::cerr << "exception thrown " << ex.what() << std::endl;
         return -1;
     }
-    
+
+    int chirp_flag {};
+    std::string chirp_str = argv[4];
+
+    try
+    {
+        chirp_flag = std::stoi(chirp_str);
+    }
+    catch (std::exception const &ex) 
+    {
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
+    }
+
+    int seconds {};
+    if (chirp_flag)
+    {
+        
+        seconds = 5;
+    }
+    else
+    {
+        seconds = 1;
+    }
+
     double gain = 1;
-    int seconds = 1;
+    
     long double symbol_duration_time = 1/fs; 
 
-    std::cout << "fs = " << fs << ", bits = " << bit_depth << ", frq offset = " << freq_offset << std::endl;
+    std::cout << "fs = " << fs << ", bits = " << bit_depth << ", frq offset = " << freq_offset << ", chirp flag = " << chirp_flag << std::endl;
     
     std::vector<double> sample_time = {};
 
@@ -109,6 +134,16 @@ int main(int argc, char* argv[]) {
     }
     
     int samples_in_a_sec = sample_time.size();
+    double chirp_freq_step {};
+    // calc chirp settings
+    if ( chirp_flag )
+    {
+        chirp_freq_step =  (freq_offset * 2) / (samples_in_a_sec * seconds);
+        freq_offset = -freq_offset; //make neg
+    }
+    
+
+
     
     
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
@@ -122,6 +157,10 @@ int main(int argc, char* argv[]) {
             ival = (*dac_range_p) * gain * sin(2*M_PI*freq_offset*(1/fs*sample_index));
             qval = (*dac_range_p) * gain * cos(2*M_PI*freq_offset*(1/fs*sample_index));
             
+            if (chirp_flag)
+            {
+                freq_offset += chirp_freq_step;
+            }
             //32 bit words for ION format
             
             // Intel processor on laptop so need to change byte order to meet ION standard.
