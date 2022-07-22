@@ -8,3 +8,5 @@ make
 
 to clean:
 make clean
+
+New features welcome, create a branch and have a play :)
