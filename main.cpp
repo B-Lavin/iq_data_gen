@@ -17,11 +17,12 @@ int main(int argc, char* argv[]) {
         std::cout << "Insuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
-                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset> <chirp>"
-                  << "\nExample: ./iq_data_gen 60e6 16 100 0" << std::endl;
+                  << "\nChirp starts from -freq_offset and goes to + freq_offset"
+                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset> <chirp> <duration_secs>"
+                  << "\nExample: ./iq_data_gen 60e6 16 100 0 5" << std::endl;
         return 0;
     }
-    else if ( argc == 5)
+    else if ( argc == 6)
     {
         std::cout << "correct number of arguments, but limited error checking in place" << std::endl;
     }
@@ -109,21 +110,25 @@ int main(int argc, char* argv[]) {
     }
 
     int seconds {};
-    if (chirp_flag)
+    std::string duration_secs = argv[5];
+    try
     {
-        
-        seconds = 5;
+        seconds = std::stoi(duration_secs);
     }
-    else
+    catch(std::exception const &ex)
     {
-        seconds = 1;
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
     }
 
     double gain = 1;
     
     long double symbol_duration_time = 1/fs; 
 
-    std::cout << "fs = " << fs << ", bits = " << bit_depth << ", frq offset = " << freq_offset << ", chirp flag = " << chirp_flag << std::endl;
+    std::cout << "fs = " << fs << ", bits = " << bit_depth 
+              << ", frq offset = " << freq_offset 
+              << ", chirp flag = " << chirp_flag 
+              << ", duration secs = " << seconds << std::endl;
     
     std::vector<double> sample_time = {};
 
@@ -143,8 +148,6 @@ int main(int argc, char* argv[]) {
     }
     
 
-
-    
     
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
     
