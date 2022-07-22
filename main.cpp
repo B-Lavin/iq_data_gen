@@ -124,42 +124,35 @@ int main(int argc, char* argv[]) {
 
     double gain = 1;
     
-    long double symbol_duration_time = 1/fs; 
+    //long double symbol_duration_time = 1/fs; 
 
     std::cout << "fs = " << fs << ", bits = " << bit_depth 
               << ", deviation = " << deviation 
               << ", chirp flag = " << chirp_flag 
               << ", duration secs = " << seconds << std::endl;
     
-    std::vector<double> sample_time = {};
-
-    //fill t with values from 0 to 1 in steps of 1/fs
-    for(int index = 0; index<fs; ++index)
-    {
-        sample_time.push_back(index*symbol_duration_time);
-    }
     
-    int samples_in_a_sec = sample_time.size();
-    double chirp_freq_step {};
     // calc chirp settings
+   /* double chirp_freq_step {};
     if ( chirp_flag )
     {
-        chirp_freq_step =  (deviation * 2) / (samples_in_a_sec * seconds); //deviation
+        chirp_freq_step =  (deviation * 2) / (fs * seconds); //deviation
         deviation = -deviation; //make neg
-    }
+    } */
     
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
     
-    for( int sample_index = 0; sample_index < ( samples_in_a_sec * seconds ); ++sample_index)
+    for( int sample_index = 0; sample_index < ( fs * seconds ); ++sample_index)
     {
         int16_t ival {0};
         int16_t qval {0};
-        ival = (*dac_range_p) * gain * sin(2.0*M_PI*deviation*(1/fs*sample_index));
-        qval = (*dac_range_p) * gain * cos(2.0*M_PI*deviation*(1/fs*sample_index));
+        double t = 1/fs*sample_index;
+        ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
+        qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
         
         if (chirp_flag)
         {
-            deviation += chirp_freq_step;
+            //deviation += chirp_freq_step;
         }
         //32 bit words for ION format
         
