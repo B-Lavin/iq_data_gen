@@ -17,8 +17,8 @@ int main(int argc, char* argv[]) {
         std::cout << "Insuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
-                  << "\nChirp starts from -freq_offset and goes to + freq_offset"
-                  << "\nProgram syntax: <Fs> <bitdepth> <freq_offset> <chirp> <duration_secs>"
+                  << "\nChirp starts from -deviation and goes to + deviation"
+                  << "\nProgram syntax: <Fs> <bitdepth> <deviation> <chirp> <duration_secs>"
                   << "\nExample: ./iq_data_gen 60e6 16 100 0 5" 
                   << "17 seconds max at 120MHz " << std::endl;
         return 0;
@@ -85,11 +85,11 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    double freq_offset {};
+    double deviation {};
     std::string freq_offset_str = argv[3];
     try
     {
-        freq_offset = std::stod(freq_offset_str);
+        deviation = std::stod(freq_offset_str);
     }
     catch (std::exception const &ex) 
     {
@@ -127,7 +127,7 @@ int main(int argc, char* argv[]) {
     long double symbol_duration_time = 1/fs; 
 
     std::cout << "fs = " << fs << ", bits = " << bit_depth 
-              << ", frq offset = " << freq_offset 
+              << ", deviation = " << deviation 
               << ", chirp flag = " << chirp_flag 
               << ", duration secs = " << seconds << std::endl;
     
@@ -144,8 +144,8 @@ int main(int argc, char* argv[]) {
     // calc chirp settings
     if ( chirp_flag )
     {
-        chirp_freq_step =  (freq_offset * 2) / (samples_in_a_sec * seconds); //deviation
-        freq_offset = -freq_offset; //make neg
+        chirp_freq_step =  (deviation * 2) / (samples_in_a_sec * seconds); //deviation
+        deviation = -deviation; //make neg
     }
     
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
@@ -154,12 +154,12 @@ int main(int argc, char* argv[]) {
     {
         int16_t ival {0};
         int16_t qval {0};
-        ival = (*dac_range_p) * gain * sin(2.0*M_PI*freq_offset*(1/fs*sample_index));
-        qval = (*dac_range_p) * gain * cos(2.0*M_PI*freq_offset*(1/fs*sample_index));
+        ival = (*dac_range_p) * gain * sin(2.0*M_PI*deviation*(1/fs*sample_index));
+        qval = (*dac_range_p) * gain * cos(2.0*M_PI*deviation*(1/fs*sample_index));
         
         if (chirp_flag)
         {
-            freq_offset += chirp_freq_step;
+            deviation += chirp_freq_step;
         }
         //32 bit words for ION format
         
@@ -187,7 +187,7 @@ int main(int argc, char* argv[]) {
             fwrite(&byte, sizeof(uint8_t), 1, outfile);
         }
 
-        if (0 )
+        if ( 0 )
         {
            // std::cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << std::endl;
         }
