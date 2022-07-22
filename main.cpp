@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nProgram syntax: <Fs> <bitdepth> <freq_offset>"
-                  << "\n Example: ./iq_data_gen 60e6 16 100" << std::endl;
+                  << "\nExample: ./iq_data_gen 60e6 16 100" << std::endl;
         return 0;
     }
     else if ( argc == 4)
