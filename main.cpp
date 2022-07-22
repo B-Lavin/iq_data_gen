@@ -19,7 +19,8 @@ int main(int argc, char* argv[]) {
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nChirp starts from -freq_offset and goes to + freq_offset"
                   << "\nProgram syntax: <Fs> <bitdepth> <freq_offset> <chirp> <duration_secs>"
-                  << "\nExample: ./iq_data_gen 60e6 16 100 0 5" << std::endl;
+                  << "\nExample: ./iq_data_gen 60e6 16 100 0 5" 
+                  << "17 seconds max at 120MHz " << std::endl;
         return 0;
     }
     else if ( argc == 6)
@@ -143,57 +144,57 @@ int main(int argc, char* argv[]) {
     // calc chirp settings
     if ( chirp_flag )
     {
-        chirp_freq_step =  (freq_offset * 2) / (samples_in_a_sec * seconds);
+        chirp_freq_step =  (freq_offset * 2) / (samples_in_a_sec * seconds); //deviation
         freq_offset = -freq_offset; //make neg
     }
     
-
-    
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
     
-    for(int seconds_into_run=0; seconds_into_run < seconds; ++seconds_into_run) 
+    for( int sample_index = 0; sample_index < ( samples_in_a_sec * seconds ); ++sample_index)
     {
-        for(int sample_index =0; sample_index < samples_in_a_sec; ++sample_index)
-        {
-            int16_t ival {0};
-            int16_t qval {0};
-            ival = (*dac_range_p) * gain * sin(2*M_PI*freq_offset*(1/fs*sample_index));
-            qval = (*dac_range_p) * gain * cos(2*M_PI*freq_offset*(1/fs*sample_index));
-            
-            if (chirp_flag)
-            {
-                freq_offset += chirp_freq_step;
-            }
-            //32 bit words for ION format
-            
-            // Intel processor on laptop so need to change byte order to meet ION standard.
-            if ( bit_depth == 16 )
-            {
-                uint8_t bytes[4];
-                bytes[0] = (ival >> 8) & 0xff;
-                bytes[1] = ival & 0xff;
-                bytes[2] = (qval >> 8) & 0xff;
-                bytes[3] = qval & 0xff;
-                fwrite(bytes, sizeof bytes, 1, outfile);
-            }
-            else if ( bit_depth == 8 )
-            {
-                uint8_t byte = (uint8_t)ival;
-                fwrite(&byte, sizeof(uint8_t), 1, outfile);
-                byte = (uint8_t)qval;
-                fwrite(&byte, sizeof(uint8_t), 1, outfile);
-            }
-            else // bit depth is 4, checked above
-            {
-                uint8_t byte = (uint8_t)( ( ival & 0xf ) << 4 );
-                byte |= (uint8_t) ( qval & 0xf );
-                fwrite(&byte, sizeof(uint8_t), 1, outfile);
-            }
-
-        } 
+        int16_t ival {0};
+        int16_t qval {0};
+        ival = (*dac_range_p) * gain * sin(2.0*M_PI*freq_offset*(1/fs*sample_index));
+        qval = (*dac_range_p) * gain * cos(2.0*M_PI*freq_offset*(1/fs*sample_index));
         
-        std::cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << std::endl;
-    }
+        if (chirp_flag)
+        {
+            freq_offset += chirp_freq_step;
+        }
+        //32 bit words for ION format
+        
+        // Intel processor on laptop so need to change byte order to meet ION standard.
+        if ( bit_depth == 16 )
+        {
+            uint8_t bytes[4];
+            bytes[0] = (ival >> 8) & 0xff;
+            bytes[1] = ival & 0xff;
+            bytes[2] = (qval >> 8) & 0xff;
+            bytes[3] = qval & 0xff;
+            fwrite(bytes, sizeof bytes, 1, outfile);
+        }
+        else if ( bit_depth == 8 )
+        {
+            uint8_t byte = (uint8_t)ival;
+            fwrite(&byte, sizeof(uint8_t), 1, outfile);
+            byte = (uint8_t)qval;
+            fwrite(&byte, sizeof(uint8_t), 1, outfile);
+        }
+        else // bit depth is 4, checked above
+        {
+            uint8_t byte = (uint8_t)( ( ival & 0xf ) << 4 );
+            byte |= (uint8_t) ( qval & 0xf );
+            fwrite(&byte, sizeof(uint8_t), 1, outfile);
+        }
+
+        if (0 )
+        {
+           // std::cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << std::endl;
+        }
+
+    } 
+        
+        
 
     fclose(outfile);
 
