@@ -132,14 +132,6 @@ int main(int argc, char* argv[]) {
               << ", duration secs = " << seconds << std::endl;
     
     
-    // calc chirp settings
-   /* double chirp_freq_step {};
-    if ( chirp_flag )
-    {
-        chirp_freq_step =  (deviation * 2) / (fs * seconds); //deviation
-        deviation = -deviation; //make neg
-    } */
-    
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
     
     for( int sample_index = 0; sample_index < ( fs * seconds ); ++sample_index)
@@ -147,12 +139,16 @@ int main(int argc, char* argv[]) {
         int16_t ival {0};
         int16_t qval {0};
         double t = 1/fs*sample_index;
-        ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
-        qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
         
         if (chirp_flag)
         {
-            //deviation += chirp_freq_step;
+            ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
+            qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
+        }
+        else
+        {
+            ival = (*dac_range_p) * gain * sin(2.0 * M_PI * deviation * t );
+            qval = (*dac_range_p) * gain * cos(2.0 * M_PI * deviation * t );
         }
         //32 bit words for ION format
         
