@@ -7,8 +7,7 @@
 #include <vector>
 #include <exception>
 #include <string>
-
-
+#include <time.h>
 
 int main(int argc, char* argv[]) {
   
@@ -33,7 +32,35 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    const char *ofile = "iq.bin";
+    //get current time
+
+    time_t now = time(0);
+    struct tm tstruct;
+    char date[80];
+    char time[80];
+    tstruct = *localtime(&now);
+
+    strftime(date, sizeof(date), "%Y-%m-%d", &tstruct);
+    strftime(time, sizeof(time), "%H%M", &tstruct);
+
+    std::cout << "the date is " << date << std::endl;
+    std::cout << "the time is " << time << std::endl;
+
+    std::string fs_filename_str = argv[1];
+    int fs_stod;
+    try
+    {
+        fs_stod = std::stoi(fs_filename_str);
+        fs_filename_str = std::to_string(fs_stod);
+    }
+    catch (std::exception const &ex) 
+    {
+        std::cerr << "exception thrown " << ex.what() << std::endl;
+        return -1;
+    }
+
+    std::string filename = fs_filename_str + "msps_" + std::string(argv[2]) + "mhz_div_" + std::string(argv[3]) + "_" + date + "-" + time + ".bin";
+    const char *ofile = filename.c_str();
     FILE *outfile = fopen(ofile, "wb");
     if (outfile==NULL) perror ("Error opening file to write");
 
@@ -133,7 +160,8 @@ int main(int argc, char* argv[]) {
     
     
     std::cout << "\nSTARTING DATA GENERATION" << std::endl;
-    
+
+    int seconds_into_run = 0;  
     for( int sample_index = 0; sample_index < ( fs * seconds ); ++sample_index)
     {
         int16_t ival {0};
@@ -176,9 +204,10 @@ int main(int argc, char* argv[]) {
             fwrite(&byte, sizeof(uint8_t), 1, outfile);
         }
 
-        if ( 0 )
+        if ( sample_index % int(fs) == 0 || sample_index == ( fs * seconds )-1 )
         {
-           // std::cout << "approximately " << (seconds_into_run + 1) << " seconds of IQ data produced" << std::endl;
+            std::cout << "approximately " << (seconds_into_run ) << " seconds of IQ data produced" << std::endl;
+            seconds_into_run += 1;
         }
 
     } 
