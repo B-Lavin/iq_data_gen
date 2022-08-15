@@ -43,9 +43,6 @@ int main(int argc, char* argv[]) {
     strftime(date, sizeof(date), "%Y-%m-%d", &tstruct);
     strftime(time, sizeof(time), "%H%M", &tstruct);
 
-    std::cout << "the date is " << date << std::endl;
-    std::cout << "the time is " << time << std::endl;
-
     std::string fs_filename_str = argv[1];
     int fs_stod;
     try
