@@ -14,14 +14,14 @@ int main(int argc, char* argv[]) {
   
     if (argc == 1)
     {
-        std::cout << "Version: " << VERSION << "\n"
-                  << "Insuffitient arguments:"
+        std::cout << "Version: " << VERSION
+                  << "\nInsuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nChirp starts from -deviation and goes to + deviation"
                   << "\nProgram syntax: <Fs> <bitdepth> <deviation> <chirp> <duration_secs>"
                   << "\nExample: ./iq_data_gen 60e6 16 100 0 5" 
-                  << "17 seconds max at 120MHz " << std::endl;
+                  << "\n17 seconds max at 120MHz " << std::endl;
         return 0;
     }
     else if ( argc == 6)
