@@ -150,8 +150,8 @@ int main(int argc, char* argv[]) {
         
         if (chirp_flag)
         {
-            ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
-            qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
+            ival = (*dac_range_p) * gain * sin(2.0 * M_PI * (-deviation/2 + deviation/seconds/2 * t) * t);
+            qval = (*dac_range_p) * gain * cos(2.0 * M_PI * (-deviation/2 + deviation/seconds/2 * t) * t);
         }
         else if (deviation_flag)
         {
