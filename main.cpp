@@ -90,10 +90,14 @@ int main(int argc, char* argv[]) {
     }
 
     double deviation {};
+    bool deviation_flag = false;
     std::string freq_offset_str = argv[3];
     try
     {
         deviation = std::stod(freq_offset_str);
+        if (deviation)
+            deviation_flag = true;
+            
     }
     catch (std::exception const &ex) 
     {
@@ -149,10 +153,15 @@ int main(int argc, char* argv[]) {
             ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
             qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
         }
-        else
+        else if (deviation_flag)
         {
             ival = (*dac_range_p) * gain * sin(2.0 * M_PI * deviation * t );
             qval = (*dac_range_p) * gain * cos(2.0 * M_PI * deviation * t );
+        }
+        else
+        {
+            ival = (*dac_range_p) * gain * sin(2.0 * M_PI * t );
+            qval = (*dac_range_p) * gain * cos(2.0 * M_PI * t );
         }
         //32 bit words for ION format
         
