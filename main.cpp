@@ -8,7 +8,7 @@
 #include <exception>
 #include <string>
 
-#define VERSION 1.0
+#define VERSION "V1.01"
 
 int main(int argc, char* argv[]) {
   
