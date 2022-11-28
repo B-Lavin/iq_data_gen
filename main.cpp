@@ -8,13 +8,14 @@
 #include <exception>
 #include <string>
 
-
+#define VERSION "V1.01"
 
 int main(int argc, char* argv[]) {
   
     if (argc == 1)
     {
-        std::cout << "Insuffitient arguments:"
+        std::cout << "Version: " << VERSION << "\n"
+                  << "Insuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nChirp starts from -deviation and goes to + deviation"
