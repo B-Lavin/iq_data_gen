@@ -20,8 +20,11 @@ int main(int argc, char* argv[]) {
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nChirp starts from -deviation and goes to + deviation"
                   << "\nProgram syntax: <Fs> <bitdepth> <deviation> <chirp> <duration_secs>"
+                  << "\nInput units: Fs = Hz, bit depth = 4 8 16, deviation = Hz, chirp 0 or 1,"
+                  << "\nSeconds = integer seconds"
                   << "\nExample: ./iq_data_gen 60e6 16 100 0 5" 
-                  << "\n17 seconds max at 120MHz " << std::endl;
+                  << "\nThat's 60MHz, 16bit, 100Hz deviation from centre, chrip off, 5 seconds"
+                  << "\nDuration limit is 17 seconds max at 120MHz " << std::endl;
         return 0;
     }
     else if ( argc == 6)
