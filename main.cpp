@@ -14,14 +14,17 @@ int main(int argc, char* argv[]) {
   
     if (argc == 1)
     {
-        std::cout << "Version: " << VERSION << "\n"
-                  << "Insuffitient arguments:"
+        std::cout << "Version: " << VERSION
+                  << "\nInsuffitient arguments:"
                   << "\nSinewave IQ data generator, packs data to ION data standard, 32bit words"
                   << "\nintel specific data packing, check your endianess!!!"
                   << "\nChirp starts from -deviation and goes to + deviation"
                   << "\nProgram syntax: <Fs> <bitdepth> <deviation> <chirp> <duration_secs>"
+                  << "\nInput units: Fs = Hz, bit depth = 4 8 16, deviation = Hz, chirp 0 or 1,"
+                  << "\nSeconds = integer seconds"
                   << "\nExample: ./iq_data_gen 60e6 16 100 0 5" 
-                  << "17 seconds max at 120MHz " << std::endl;
+                  << "\nThat's 60MHz, 16bit, 100Hz deviation from centre, chrip off, 5 seconds"
+                  << "\nDuration limit is 17 seconds max at 120MHz " << std::endl;
         return 0;
     }
     else if ( argc == 6)
@@ -87,10 +90,14 @@ int main(int argc, char* argv[]) {
     }
 
     double deviation {};
+    bool deviation_flag = false;
     std::string freq_offset_str = argv[3];
     try
     {
         deviation = std::stod(freq_offset_str);
+        if (deviation)
+            deviation_flag = true;
+            
     }
     catch (std::exception const &ex) 
     {
@@ -143,13 +150,18 @@ int main(int argc, char* argv[]) {
         
         if (chirp_flag)
         {
-            ival = (*dac_range_p) * gain * sin(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
-            qval = (*dac_range_p) * gain * cos(2.0*M_PI*(-deviation/2 + deviation/seconds/2 *t ) * t);
+            ival = (*dac_range_p) * gain * sin(2.0 * M_PI * (-deviation/2 + deviation/seconds/2 * t) * t);
+            qval = (*dac_range_p) * gain * cos(2.0 * M_PI * (-deviation/2 + deviation/seconds/2 * t) * t);
         }
-        else
+        else if (deviation_flag)
         {
             ival = (*dac_range_p) * gain * sin(2.0 * M_PI * deviation * t );
             qval = (*dac_range_p) * gain * cos(2.0 * M_PI * deviation * t );
+        }
+        else
+        {
+            ival = (*dac_range_p) * gain * sin(2.0 * M_PI * t );
+            qval = (*dac_range_p) * gain * cos(2.0 * M_PI * t );
         }
         //32 bit words for ION format
         
